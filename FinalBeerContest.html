@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ultimate Beer Champion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --gold: #d4af37;
+      }
+      .text-gold {
+        color: var(--gold);
+      }
+      .bg-gold {
+        background: linear-gradient(90deg, var(--gold), #f9d976);
+      }
+    </style>
+  </head>
+  <body class="bg-white min-h-screen font-sans">
+    <div id="root" class="p-6 max-w-5xl mx-auto"></div>
+
+    <!-- React + ReactDOM + Babel (so you can run it in browser) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      const initialBeers = [
+        { key: "Heineken", image: "https://i.supaimg.com/f1a5951e-a92e-4d57-a09b-f1457425bba9.jpg" },
+        { key: "Guinness", image: "https://i.supaimg.com/9ab27abd-993b-4a7a-a6b0-90422174bc11.webp" },
+        { key: "Jelen", image: "https://i.supaimg.com/3980b0b2-0b92-4099-82a3-fcb4edb639cf.jpg" },
+        { key: "Nektar", image: "https://i.supaimg.com/4eb5da02-1158-4c5b-aa9a-4ea039d0b630.jpg" },
+        { key: "Zajecarsko", image: "https://i.supaimg.com/ddc8d151-455c-486a-b4ce-43be886f2a5b.jpg" },
+        { key: "Bavaria", image: "https://i.supaimg.com/1676e885-298a-48a5-b11a-474ba28644e9.jpg" },
+        { key: "Becks", image: "https://i.supaimg.com/30e0ff4f-b47e-4b35-902d-24874f1a0c25.jpg" },
+        { key: "Ozujsko", image: "https://i.supaimg.com/6f492d97-4a9c-48c2-882a-6f726402337e.jpg" },
+        { key: "Karlovacko", image: "https://i.supaimg.com/91c62c08-0955-454e-9752-7b26a86aa7fe.jpg" },
+        { key: "Vukovarsko", image: "https://i.supaimg.com/3cfa6ae1-3d82-48bb-a3a9-e6b6aae659cf.png" },
+        { key: "Gricka Vjestica", image: "https://i.supaimg.com/a21279e8-a2a0-4b47-bf9f-39f721031e94.png" },
+        { key: "Zlatni Medved", image: "https://i.supaimg.com/55964e61-c34d-4ec3-86fe-76e317549d20.jpg" },
+        { key: "Tuborg", image: "https://i.supaimg.com/f42e5e7a-feca-45e8-8c31-a1847c142c9d.jpg" },
+        { key: "Niksicko", image: "https://i.supaimg.com/a490a443-1b4e-4dfd-9f96-20c782b1a3c2.jpg" },
+      ];
+
+      const shuffle = (arr) => arr.slice().sort(() => Math.random() - 0.5);
+
+      function App() {
+        const [started, setStarted] = useState(false);
+        const [pool, setPool] = useState([]);
+        const [current, setCurrent] = useState([]);
+        const [champion, setChampion] = useState(null);
+
+        useEffect(() => {
+          if (started) beginTournament();
+        }, [started]);
+
+        function beginTournament() {
+          const shuffled = shuffle(initialBeers);
+          setPool(shuffled);
+          setChampion(null);
+          if (shuffled.length === 1) setChampion(shuffled[0]);
+          else setCurrent([shuffled[0], shuffled[1]]);
+        }
+
+        function castVote(selected) {
+          const [beerA, beerB, ...rest] = pool;
+          const winner = selected.key === beerA.key ? beerA : beerB;
+          const newPool = [winner, ...rest];
+          if (newPool.length === 1) {
+            setChampion(newPool[0]);
+            setCurrent([]);
+          } else {
+            setPool(newPool);
+            setCurrent([newPool[0], newPool[1]]);
+          }
+        }
+
+        function restart() {
+          setChampion(null);
+          setPool([]);
+          setCurrent([]);
+          setStarted(false);
+        }
+
+        return (
+          <div className="min-h-screen flex flex-col items-center p-6">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-gold mb-6">
+              {champion ? "Ultimate Beer Champion" : "Beer Championship"}
+            </h1>
+
+            {/* Start screen */}
+            {!started && !champion && (
+              <main className="w-full max-w-4xl bg-white rounded-xl shadow-md p-6">
+                <p className="text-gray-600 mb-4 text-center">
+                  14 contenders enter the arena. Only one will be crowned.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                  {initialBeers.map((b) => (
+                    <div
+                      key={b.key}
+                      className="flex flex-col items-center bg-gray-50 rounded p-3"
+                    >
+                      <img
+                        src={b.image}
+                        alt={b.key}
+                        className="w-24 h-24 object-cover rounded"
+                      />
+                      <div className="mt-2 text-sm font-semibold text-gray-700">
+                        {b.key}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-center">
+                  <button
+                    onClick={() => setStarted(true)}
+                    className="px-6 py-3 rounded-full bg-gold text-white font-bold shadow-lg hover:opacity-95 transition"
+                  >
+                    Start the Battle
+                  </button>
+                </div>
+              </main>
+            )}
+
+            {/* Matchup screen */}
+            {started && !champion && current.length === 2 && (
+              <main className="w-full max-w-4xl bg-white rounded-xl shadow-md p-6 transition-transform duration-300">
+                <div className="flex flex-col md:flex-row items-center justify-between">
+                  {current.map((beer) => (
+                    <div
+                      key={beer.key}
+                      className="w-full md:w-1/2 p-4 flex flex-col items-center"
+                    >
+                      <div className="relative w-40 h-40 md:w-56 md:h-56 rounded overflow-hidden shadow-xl">
+                        <img
+                          src={beer.image}
+                          alt={beer.key}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="mt-4 text-2xl font-bold text-gray-800">
+                        {beer.key}
+                      </div>
+                      <button
+                        onClick={() => castVote(beer)}
+                        className="mt-4 px-6 py-2 rounded-full bg-gold text-white font-semibold shadow hover:scale-105 transform transition"
+                      >
+                        Vote
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </main>
+            )}
+
+            {/* Champion screen */}
+            {champion && (
+              <main className="w-full max-w-4xl bg-white rounded-xl shadow-md p-6 flex flex-col items-center">
+                <div className="relative">
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-6xl">
+                    👑
+                  </div>
+                  <div className="w-56 h-56 rounded overflow-hidden shadow-2xl">
+                    <img
+                      src={champion.image}
+                      alt={champion.key}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 text-3xl font-extrabold text-gray-800">
+                  {champion.key}
+                </div>
+                <div className="mt-3 text-gray-600 text-center">
+                  The people have spoken. {champion.key} reigns supreme!
+                </div>
+                <button
+                  onClick={restart}
+                  className="mt-8 px-6 py-3 rounded-full bg-gold text-white font-bold shadow hover:opacity-95 transition"
+                >
+                  Restart Tournament
+                </button>
+              </main>
+            )}
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
